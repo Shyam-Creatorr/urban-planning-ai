@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrbanAI Planner Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font and basic dark mode styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Darker than gray-900 for body background */
+        }
+        #root {
+            min-height: 100vh;
+        }
+        /* Custom styles for the grid visualization */
+        .plan-grid > div {
+            transition: background-color 0.3s ease;
+        }
+        /* Fix for scrollbar on mobile when using min-h-screen */
+        html { overflow-y: scroll; }
+
+        /* Animation for the re-prediction pulse */
+        @keyframes pulse-spin {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pulse-spin {
+            animation: pulse-spin 2.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        // --- Icon SVGs (Inline) ---
+        const icons = {
+            Check: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M20 6 9 17l-5-5" /></svg>`,
+            X: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>`,
+            User: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>`,
+            MapPin: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>`,
+            Ruler: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m21.03 21.03-4.06-4.06" /><path d="m2.06 2.06 4.06 4.06" /><path d="M12.03 12.03 21.98 2.08" /><path d="M9.9 14.1 4.04 20" /><path d="M4 4 2 6" /><path d="m13 13-1.5-1.5" /><path d="m16 16-1.5-1.5" /><path d="m20 20-2-2" /></svg>`,
+            Building: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /></svg>`,
+            Clock: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>`,
+            CheckCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>`,
+            XCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>`,
+            Download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>`,
+        };
+
+        // --- Mock ML/Plan Data ---
+        const AVAILABLE_BUILDINGS = [
+            'Residential Building', 'School', 'Clinic', 'Club House',
+            'Park', 'Commercial Shop', 'Office Space',
+        ];
+
+        const MOCK_PLANS = [
+            {
+                id: 1,
+                title: 'Prediction 1: Balanced Approach',
+                accuracy: 0.92,
+                layout: [
+                    { id: 'res1', type: 'Residential', area: '1 / 1 / 6 / 6' },
+                    { id: 'res2', type: 'Residential', area: '1 / 7 / 6 / 11' },
+                    { id: 'school', type: 'School', area: '7 / 1 / 11 / 6' },
+                    { id: 'park', type: 'Park', area: '7 / 7 / 11 / 11' },
+                    { id: 'road_v', type: 'Road', area: '1 / 6 / 11 / 7' },
+                    { id: 'road_h', type: 'Road', area: '6 / 1 / 7 / 11' },
+                    { id: 'gate1', type: 'Gate', area: '1 / 6 / 2 / 7' },
+                    { id: 'gate2', type: 'Gate', area: '6 / 1 / 7 / 2' },
+                ],
+            },
+            {
+                id: 2,
+                title: 'Prediction 2: Green Space Focus',
+                accuracy: 0.88,
+                layout: [
+                    { id: 'park1', type: 'Park', area: '1 / 1 / 11 / 7' },
+                    { id: 'res1', type: 'Residential', area: '1 / 8 / 6 / 11' },
+                    { id: 'school', type: 'School', area: '7 / 8 / 11 / 11' },
+                    { id: 'road_v', type: 'Road', area: '1 / 7 / 11 / 8' },
+                    { id: 'road_h', type: 'Road', area: '6 / 7 / 7 / 11' },
+                    { id: 'gate1', type: 'Gate', area: '1 / 7 / 2 / 8' },
+                ],
+            },
+            {
+                id: 3,
+                title: 'Prediction 3: High Density',
+                accuracy: 0.96,
+                layout: [
+                    { id: 'res1', type: 'Residential', area: '1 / 1 / 4 / 4' },
+                    { id: 'res2', type: 'Residential', area: '1 / 5 / 4 / 8' },
+                    { id: 'office', type: 'Office', area: '1 / 9 / 4 / 11' },
+                    { id: 'shops', type: 'Commercial', area: '5 / 1 / 8 / 4' },
+                    { id: 'clinic', type: 'Clinic', area: '5 / 5 / 8 / 8' },
+                    { id: 'res3', type: 'Residential', area: '5 / 9 / 11 / 11' },
+                    { id: 'park', type: 'Park', area: '8 / 1 / 11 / 4' },
+                    { id: 'club', type: 'Club House', area: '8 / 5 / 11 / 8' },
+                    { id: 'road_v1', type: 'Road', area: '1 / 4 / 11 / 5' },
+                    { id: 'road_v2', type: 'Road', area: '1 / 8 / 11 / 9' },
+                    { id: 'road_h1', type: 'Road', area: '4 / 1 / 5 / 11' },
+                    { id: 'gate1', type: 'Gate', area: '1 / 4 / 2 / 5' },
+                    { id: 'gate2', type: 'Gate', area: '10 / 1 / 11 / 2' },
+                ],
+            },
+        ];
+        
+        const getPlanById = (id) => MOCK_PLANS.find(p => p.id === id);
+
+        // --- Global State ---
+        const state = {
+            appState: 'LOGIN', // LOGIN, FORM, LOADING, RESULTS, FINAL_PLAN
+            formData: {
+                lat: '28.6139',
+                lng: '77.2090',
+                length: '500',
+                width: '400',
+                buildings: ['Residential Building', 'Park'],
+            },
+            formStep: 1, // 1, 2, 3
+            hitlStatus: {
+                step1_builder: 'pending', // pending, approved, rejected
+                step2_engineer: 'pending', // pending, approved, rejected
+                step3_visualization: 'pending', // pending, approved, rejected
+            },
+            planStatuses: {
+                1: 'pending', // pending, approved, rejected
+                2: 'pending',
+                3: 'pending',
+            },
+            approvedPlanId: null, // Track the ID of the plan approved by the engineer
+            isRepredicting: false,
+        };
+
+        const root = document.getElementById('root');
+
+        // --- State Updaters (Exposed Globally for HTML Interaction) ---
+
+        /** Global function to update state and re-render. */
+        window.updateAppState = (newState) => {
+            state.appState = newState;
+            renderApp();
+        };
+
+        /** Handles sign-in form submission and prevents page reload. */
+        window.simulateSignIn = (event) => {
+            event.preventDefault(); // CRITICAL: Prevents the browser from reloading the page
+            window.updateAppState('FORM');
+            return false;
+        };
+
+        /** Handles form data changes. */
+        window.handleFormChange = (id, value) => {
+            if (id === 'length' || id === 'width') {
+                value = parseInt(value) || 0;
+            }
+            state.formData[id] = value;
+        };
+
+        /** Handles multi-select building changes. */
+        window.handleBuildingChange = (building) => {
+            const buildings = state.formData.buildings;
+            if (buildings.includes(building)) {
+                state.formData.buildings = buildings.filter(b => b !== building);
+            } else {
+                state.formData.buildings = [...buildings, building];
+            }
+            renderApp(); // Re-render the form to update checkboxes
+        };
+
+        /** Navigates to the next step in the form. */
+        window.handleNextStep = () => {
+            if (state.formStep < 3) {
+                state.formStep++;
+            }
+            renderApp();
+        };
+
+        /** Navigates to the previous step in the form. */
+        window.handleBackStep = () => {
+            if (state.formStep > 1) {
+                state.formStep--;
+            }
+            renderApp();
+        };
+
+        /** Handles HITL status changes. */
+        window.updateHitlStatus = (step, status) => {
+            state.hitlStatus[step] = status;
+            
+            // Logic for Step 3 Rejection loop-back
+            if (step === 'step3_visualization' && status === 'rejected') {
+                setTimeout(() => {
+                    // Reset everything to start a new cycle
+                    state.formData = { lat: '28.6139', lng: '77.2090', length: '500', width: '400', buildings: ['Residential Building', 'Park'] };
+                    state.formStep = 1;
+                    state.hitlStatus = { step1_builder: 'pending', step2_engineer: 'pending', step3_visualization: 'pending' };
+                    state.planStatuses = { 1: 'pending', 2: 'pending', 3: 'pending' };
+                    state.approvedPlanId = null;
+                    window.updateAppState('FORM');
+                }, 1500);
+            }
+
+            // NEW: Transition to FINAL_PLAN state upon Step 3 approval
+            if (step === 'step3_visualization' && status === 'approved') {
+                setTimeout(() => {
+                    window.updateAppState('FINAL_PLAN');
+                }, 500);
+            }
+
+            renderApp();
+        };
+
+        /** Handles individual plan status changes. */
+        window.updatePlanStatus = (planId, status) => {
+            state.planStatuses[planId] = status;
+            
+            if (status === 'approved') {
+                state.approvedPlanId = planId; // Set the approved ID
+                // If any plan is approved, approve step 2
+                window.updateHitlStatus('step2_engineer', 'approved');
+            } else if (status === 'rejected') {
+                // Check if all are rejected to trigger re-prediction
+                const allRejected = Object.values(state.planStatuses).every(s => s === 'rejected');
+                if (allRejected) {
+                    state.isRepredicting = true;
+                    renderApp(); // Show overlay immediately
+
+                    setTimeout(() => {
+                        // Reset plans for re-prediction
+                        state.planStatuses = { 1: 'pending', 2: 'pending', 3: 'pending' };
+                        state.hitlStatus.step2_engineer = 'pending';
+                        state.isRepredicting = false;
+                        state.approvedPlanId = null;
+                        renderApp();
+                    }, 2500);
+                }
+            }
+            renderApp();
+        };
+
+
+        // --- Utility Functions ---
+
+        /** Renders a standard Card wrapper. */
+        const Card = (content, className = '') => `
+            <div class="bg-gray-800 shadow-lg rounded-lg overflow-hidden ${className}">
+                <div class="p-5">${content}</div>
+            </div>
+        `;
+
+        /** Renders a styled Button. */
+        const Button = (content, onClickHandler, variant = 'primary', className = '', type = 'button') => {
+            const baseStyle = 'inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all';
+            const variants = {
+                primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500',
+                secondary: 'bg-gray-700 text-white hover:bg-gray-600 focus:ring-gray-500',
+                success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
+                danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+            };
+            // If type is submit, onClickHandler is ignored since the action is on the form's onsubmit
+            const clickAttr = type !== 'submit' && onClickHandler ? `onclick="${onClickHandler}"` : '';
+
+            return `
+                <button
+                    type="${type}"
+                    class="${baseStyle} ${variants[variant]} ${className}"
+                    ${clickAttr}
+                >
+                    ${content}
+                </button>
+            `;
+        };
+
+        /** Renders an Input field. */
+        const Input = (label, id, type = 'text', value, placeholder, onChangeHandler) => `
+            <div>
+                <label for="${id}" class="block text-sm font-medium text-gray-300">
+                    ${label}
+                </label>
+                <div class="mt-1">
+                    <input
+                        id="${id}"
+                        name="${id}"
+                        type="${type}"
+                        value="${value}"
+                        placeholder="${placeholder}"
+                        class="block w-full rounded-md border-gray-600 bg-gray-900 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3"
+                        onchange="${onChangeHandler}"
+                    />
+                </div>
+            </div>
+        `;
+        
+        /** Reusable Plan Visualization Component */
+        const renderPlanLayout = (plan, sizeClass = 'aspect-square') => {
+            const buildingColors = {
+                Residential: 'bg-blue-600', School: 'bg-yellow-500', Clinic: 'bg-red-500', 
+                'Club House': 'bg-cyan-500', Park: 'bg-green-600', Commercial: 'bg-purple-500', 
+                Office: 'bg-indigo-500', Road: 'bg-gray-500', Gate: 'bg-pink-500', default: 'bg-gray-400',
+            };
+        
+            const layoutElements = plan.layout.map((item) => `
+                <div
+                    style="grid-area: ${item.area};"
+                    class="flex items-center justify-center rounded-sm ${buildingColors[item.type] || buildingColors.default} opacity-80"
+                >
+                    <span class="text-white text-[8px] font-bold p-1 text-center">
+                        ${item.type.split(' ')[0]}
+                    </span>
+                </div>
+            `).join('');
+
+            return `
+                <div class="${sizeClass} bg-gray-900 rounded-md p-1">
+                    <div
+                        class="plan-grid grid grid-cols-10 grid-rows-10 w-full h-full gap-px"
+                        style="grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr);"
+                    >
+                        ${layoutElements}
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- Screen Render Functions ---
+
+        const renderLoginScreen = () => {
+            const content = `
+                <div class="w-full max-w-md">
+                    ${Card(`
+                        <h2 class="text-center text-2xl font-bold text-white mb-6">
+                            UrbanAI Planner Login
+                        </h2>
+                        <!-- onsubmit ensures both button clicks and pressing Enter key work -->
+                        <form class="space-y-6" onsubmit="return simulateSignIn(event)">
+                            ${Input('Email Address', 'email', 'email', 'user@example.com', 'e.g., user@example.com', '')}
+                            ${Input('Password', 'password', 'password', 'password', '', '')}
+                            ${Button('Sign In', '', 'primary', 'w-full', 'submit')}
+                        </form>
+                    `, 'w-full max-w-md')}
+                </div>
+            `;
+            root.innerHTML = `<div class="min-h-screen bg-gray-900 flex items-center justify-center p-4">${content}</div>`;
+        };
+
+        const renderPlanningForm = () => {
+            const { formStep, formData } = state;
+            
+            // --- Step Content Components ---
+            let stepContent = '';
+            if (formStep === 1) {
+                stepContent = `
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-white">Land Coordinates</h3>
+                        <p class="text-sm text-gray-400">
+                            Enter the central coordinates of your land. This will be used to analyze
+                            the area using Sentinel-2 satellite data.
+                        </p>
+                        ${Input('Latitude', 'lat', 'text', formData.lat, 'e.g., 28.6139', 'handleFormChange(\'lat\', this.value)')}
+                        ${Input('Longitude', 'lng', 'text', formData.lng, 'e.g., 77.2090', 'handleFormChange(\'lng\', this.value)')}
+                    </div>
+                `;
+            } else if (formStep === 2) {
+                stepContent = `
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-white">Land Dimensions</h3>
+                        <p class="text-sm text-gray-400">
+                            Provide the dimensions of the land. This will be cross-verified with
+                            satellite imagery.
+                        </p>
+                        ${Input('Length (meters)', 'length', 'number', formData.length, 'e.g., 500', 'handleFormChange(\'length\', this.value)')}
+                        ${Input('Width (meters)', 'width', 'number', formData.width, 'e.g., 400', 'handleFormChange(\'width\', this.value)')}
+                    </div>
+                `;
+            } else if (formStep === 3) {
+                stepContent = `
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-white">Building Requirements</h3>
+                        <p class="text-sm text-gray-400">
+                            Select the types of buildings and amenities you want in the plan.
+                        </p>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${AVAILABLE_BUILDINGS.map(building => `
+                                <label class="flex items-center space-x-3 bg-gray-700 p-3 rounded-md cursor-pointer hover:bg-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        class="h-4 w-4 rounded border-gray-500 text-indigo-600 focus:ring-indigo-500 bg-gray-800"
+                                        ${formData.buildings.includes(building) ? 'checked' : ''}
+                                        onclick="handleBuildingChange('${building}')"
+                                    />
+                                    <span class="text-sm text-white">${building}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- Step Indicator ---
+            const renderStepItem = (icon, label, step) => {
+                const isCompleted = step < formStep;
+                const isActive = step === formStep;
+                const iconHtml = isCompleted ? icons.Check : icon;
+                const colorClass = isCompleted ? 'bg-indigo-600 text-white' : isActive ? 'bg-indigo-500 text-white' : 'bg-gray-600 text-gray-300';
+                const textClass = isCompleted || isActive ? 'text-white' : 'text-gray-400';
+
+                return `
+                    <li class="flex-1">
+                        <div class="flex flex-col items-center p-2 rounded-lg ${isActive ? 'bg-gray-700' : ''}">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full ${colorClass}">
+                                ${iconHtml}
+                            </span>
+                            <span class="text-xs font-medium mt-2 ${textClass}">
+                                ${label}
+                            </span>
+                        </div>
+                    </li>
+                `;
+            };
+
+            const stepIndicator = `
+                <nav class="mb-6">
+                    <ol class="flex items-center justify-between space-x-4">
+                        ${renderStepItem(icons.MapPin, 'Coordinates', 1)}
+                        ${renderStepItem(icons.Ruler, 'Dimensions', 2)}
+                        ${renderStepItem(icons.Building, 'Buildings', 3)}
+                    </ol>
+                </nav>
+            `;
+
+            // --- Navigation Buttons ---
+            const navButtons = `
+                <div class="flex justify-between mt-8">
+                    ${Button('Back', 'handleBackStep()', 'secondary', formStep === 1 ? 'opacity-0 cursor-default' : '')}
+                    ${formStep < 3
+                        ? Button('Next', 'handleNextStep()', 'primary')
+                        : Button('Generate Predictions', 'window.updateAppState(\'LOADING\'); setTimeout(() => window.updateAppState(\'RESULTS\'), 3000);', 'primary')
+                    }
+                </div>
+            `;
+
+            const content = Card(`
+                <h2 class="text-center text-2xl font-bold text-white mb-6">
+                    Create New Plan
+                </h2>
+                ${stepIndicator}
+                <div class="space-y-6">
+                    ${stepContent}
+                </div>
+                ${navButtons}
+            `, 'w-full max-w-2xl');
+
+            root.innerHTML = `<div class="min-h-screen bg-gray-900 flex items-center justify-center p-4">${content}</div>`;
+        };
+
+        const renderLoadingScreen = () => {
+            root.innerHTML = `
+                <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white p-4">
+                    <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                    <h2 class="text-2xl font-bold mb-2">Generating Plans...</h2>
+                    <p class="text-gray-400 text-center max-w-md">
+                        Analyzing coordinates, verifying dimensions with Sentinel-2 satellite data,
+                        and running ML predictions. This may take a moment.
+                    </p>
+                </div>
+            `;
+        };
+
+        const renderResultsScreen = () => {
+            const { hitlStatus, planStatuses, isRepredicting } = state;
+            const isStep1Approved = hitlStatus.step1_builder === 'approved';
+
+            // --- HITL Step Component (Partial) ---
+            const renderHitlStep = (title, stepKey, ctaText, disabled, showButtons = true) => {
+                const status = hitlStatus[stepKey];
+                const statusConfig = {
+                    pending: { icon: icons.Clock, text: 'Pending', color: 'text-yellow-400', bg: 'bg-yellow-900' },
+                    approved: { icon: icons.CheckCircle, text: 'Approved', color: 'text-green-400', bg: 'bg-green-900' },
+                    rejected: { icon: icons.XCircle, text: 'Rejected', color: 'text-red-400', bg: 'bg-red-900' },
+                };
+                
+                const current = statusConfig[status] || statusConfig.pending;
+                const description = stepKey === 'step1_builder' 
+                    ? 'A professional builder validates the user\'s input (coordinates, dimensions) against satellite data and feasibility.'
+                    : stepKey === 'step2_engineer'
+                    ? 'A civil engineer reviews the 3 AI-generated plans for structural validity, road access, and building code compliance.'
+                    : 'After a plan is approved, the engineer validates the final 2D/3D visualization and output files.';
+                
+                let buttons = '';
+                if (showButtons && status === 'pending' && !disabled) {
+                    buttons = `
+                        <div class="mt-4 space-x-2">
+                            <p class="text-xs text-gray-400 mb-2">
+                                Simulate ${ctaText} Action:
+                            </p>
+                            ${Button(icons.Check + ' Approve', `updateHitlStatus('${stepKey}', 'approved')`, 'success', 'text-xs px-2 py-1')}
+                            ${Button(icons.X + ' Reject', `updateHitlStatus('${stepKey}', 'rejected')`, 'danger', 'text-xs px-2 py-1')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="flex-1 p-4 rounded-lg ${disabled ? 'bg-gray-800 opacity-50' : 'bg-gray-700'}">
+                        <h4 class="font-semibold text-white">${title}</h4>
+                        <div class="flex items-center space-x-2 mt-2 ${current.color}">
+                            ${current.icon}
+                            <span class="font-medium text-sm">${current.text}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mt-2">${description}</p>
+                        ${buttons}
+                    </div>
+                `;
+            };
+
+            // --- Plan Visualization Component ---
+            const renderPlanVisualization = (plan) => {
+                const status = planStatuses[plan.id];
+                const isStep2Pending = hitlStatus.step2_engineer === 'pending';
+                const canEngineerReview = isStep1Approved && isStep2Pending;
+                
+                let actions = '';
+                if (canEngineerReview && status === 'pending') {
+                    actions = `
+                        <div class="space-y-2">
+                            <p class="text-xs text-gray-400 mb-2">
+                                Simulate Engineer Action for this Plan:
+                            </p>
+                            <div class="flex space-x-2">
+                                ${Button(icons.Check + ` Approve Plan ${plan.id}`, `updatePlanStatus(${plan.id}, 'approved');`, 'success', 'w-full text-xs')}
+                                ${Button(icons.X + ` Reject Plan ${plan.id}`, `updatePlanStatus(${plan.id}, 'rejected');`, 'danger', 'w-full text-xs')}
+                            </div>
+                        </div>
+                    `;
+                } else if (status !== 'pending') {
+                    const isApproved = status === 'approved';
+                    actions = `
+                        <div class="flex items-center space-x-2 p-2 rounded-md ${isApproved ? 'bg-green-900' : 'bg-red-900'}">
+                            ${isApproved ? icons.CheckCircle : icons.XCircle}
+                            <span class="text-sm font-medium ${isApproved ? 'text-green-200' : 'text-red-200'}">
+                                Plan ${status} by Engineer
+                            </span>
+                        </div>
+                    `;
+                }
+
+                return Card(`
+                    <h4 class="text-lg font-semibold text-white mb-3">${plan.title}</h4>
+
+                    <div class="mb-3">
+                        <span class="text-sm text-gray-400">Model Accuracy: </span>
+                        <span class="text-lg font-bold text-indigo-400">
+                            ${(plan.accuracy * 100).toFixed(0)}%
+                        </span>
+                    </div>
+
+                    ${renderPlanLayout(plan)}
+
+                    <div class="mt-4 flex flex-col justify-end">
+                        ${actions}
+                    </div>
+                `, 'flex flex-col');
+            };
+
+            // --- Overall Layout ---
+            const planVisualizations = MOCK_PLANS.map(plan => renderPlanVisualization(plan)).join('');
+
+            const resultsContent = `
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold">AI Prediction Results</h1>
+                        ${Button('Start New Plan', 'window.updateAppState(\'FORM\')', 'secondary')}
+                    </div>
+
+                    ${Card(`
+                        <h3 class="text-xl font-semibold text-white mb-4">
+                            Human-in-the-Loop (HITL) Verification
+                        </h3>
+                        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                            ${renderHitlStep('Step 1: Builder Input Validation', 'step1_builder', 'Professional Builder', false)}
+                            ${renderHitlStep('Step 2: Engineer AI Plan Review', 'step2_engineer', 'Professional Civil Engineer', !isStep1Approved, false)}
+                            ${renderHitlStep('Step 3: Final Visualization Validation', 'step3_visualization', 'Professional Civil Engineer', hitlStatus.step2_engineer !== 'approved')}
+                        </div>
+                    `)}
+
+                    ${isRepredicting ? `
+                        <div class="fixed inset-0 bg-gray-900 bg-opacity-90 flex flex-col items-center justify-center z-50 animate-pulse-spin">
+                            <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+                            <h2 class="text-2xl font-bold text-white mb-2">
+                                Re-running Predictions...
+                            </h2>
+                            <p class="text-gray-400">
+                                Engineer rejected all plans. The ML model is generating new predictions.
+                            </p>
+                        </div>
+                    ` : ''}
+
+                    <div class="mt-8">
+                        <h2 class="text-2xl font-semibold mb-4">
+                            Top 3 ML Predictions
+                        </h2>
+
+                        ${hitlStatus.step1_builder === 'rejected' ? `
+                            <div class="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg mb-4">
+                                <p>
+                                    <strong>Input Rejected:</strong> The professional builder has
+                                    rejected the initial inputs. Please 
+                                    <a href="#" onclick="window.updateAppState('FORM');" class="font-bold underline">start a new plan</a>
+                                    with valid data.
+                                </p>
+                            </div>
+                        ` : ''}
+                        
+                        ${isStep1Approved ? `
+                            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-6">
+                                ${planVisualizations}
+                            </div>
+                        ` : hitlStatus.step1_builder === 'pending' ? `
+                            <div class="bg-gray-800 rounded-lg p-6 text-center text-gray-400">
+                                ${icons.Clock}
+                                <p class="mt-2">Waiting for Professional Builder to validate inputs...</p>
+                            </div>
+                        ` : ''}
+
+                    </div>
+                </div>
+            `;
+
+            root.innerHTML = `<div class="min-h-screen bg-gray-900 text-white p-4 md:p-8">${resultsContent}</div>`;
+        };
+
+        const renderFinalPlanScreen = () => {
+            const finalPlan = getPlanById(state.approvedPlanId);
+            
+            if (!finalPlan) {
+                return `<div class="min-h-screen bg-gray-900 flex items-center justify-center text-red-500">Error: Final plan not found.</div>`;
+            }
+
+            const content = `
+                <div class="max-w-5xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-4xl font-extrabold text-green-400 flex items-center space-x-3">
+                            ${icons.CheckCircle} <span>Plan Approved & Finalized!</span>
+                        </h1>
+                        ${Button(icons.Download + ' Download Blueprint (DXF)', 'alert("Simulated download of finalized blueprint!");', 'success')}
+                    </div>
+                    
+                    ${Card(`
+                        <h2 class="text-2xl font-bold text-white mb-4">
+                            ${finalPlan.title}
+                        </h2>
+                        <p class="text-gray-300 mb-6">
+                            This plan has been validated by both the Builder (Step 1) and the Civil Engineer (Steps 2 & 3).
+                            It meets all defined requirements and feasibility checks.
+                        </p>
+
+                        <div class="grid md:grid-cols-3 gap-8 items-start">
+                            <div class="md:col-span-2">
+                                ${renderPlanLayout(finalPlan, 'w-full h-96')}
+                            </div>
+                            <div class="md:col-span-1 space-y-4">
+                                <h3 class="text-xl font-semibold text-indigo-400 border-b border-indigo-700 pb-2">Plan Details</h3>
+                                <div class="space-y-2 text-gray-200">
+                                    <p><strong>Model Accuracy:</strong> <span class="text-green-400 font-bold">${(finalPlan.accuracy * 100).toFixed(2)}%</span></p>
+                                    <p><strong>Land Dimensions:</strong> ${state.formData.length}m x ${state.formData.width}m</p>
+                                    <p><strong>Location:</strong> Lat: ${state.formData.lat}, Lng: ${state.formData.lng}</p>
+                                    <p><strong>Required Structures:</strong> ${state.formData.buildings.length} types</p>
+                                </div>
+                                <h3 class="text-xl font-semibold text-indigo-400 border-b border-indigo-700 pt-4 pb-2">Next Steps</h3>
+                                <p class="text-sm text-gray-300">
+                                    Use the 'Download Blueprint' button to get the finalized DXF file, ready for construction planning and permitting.
+                                </p>
+                                ${Button('Start New Project', 'window.updateAppState(\'FORM\')', 'secondary', 'w-full mt-4')}
+                            </div>
+                        </div>
+
+                    `)}
+                </div>
+            `;
+
+            root.innerHTML = `<div class="min-h-screen bg-gray-900 text-white p-4 md:p-12">${content}</div>`;
+        };
+
+        // --- Main App Renderer ---
+        const renderApp = () => {
+            if (state.isRepredicting) {
+                // If re-predicting, only show the overlay until the timeout clears the flag
+                renderResultsScreen();
+                return;
+            }
+
+            switch (state.appState) {
+                case 'LOGIN':
+                    renderLoginScreen();
+                    break;
+                case 'FORM':
+                    renderPlanningForm();
+                    break;
+                case 'LOADING':
+                    renderLoadingScreen();
+                    break;
+                case 'RESULTS':
+                    renderResultsScreen();
+                    break;
+                case 'FINAL_PLAN':
+                    renderFinalPlanScreen();
+                    break;
+                default:
+                    renderLoginScreen();
+            }
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', renderApp);
+    </script>
+</body>
+</html>
