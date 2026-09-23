@@ -1,0 +1,22 @@
+Backend Stack (Python Ecosystem)
+Web Framework & API Engine: FastAPI (v0.141) powered by Uvicorn (v0.52) ASGI server & Starlette.
+Database & ORM: SQLAlchemy (v2.0) with SQLite (urban_planner.db), structured with migration paths for PostgreSQL (psycopg2-binary).
+Authentication & Security: PyJWT (JSON Web Token authentication), Passlib with Bcrypt password hashing, OAuth2 Password Bearer flow, and google-auth (google.oauth2.id_token) for Google OAuth 2.0 verification.
+Geospatial & Spatial Computing:
+Shapely (v2.1) for polygon bounding box calculations, collision checks, and spatial partitioning.
+OpenStreetMap Nominatim API (via requests) for real-world reverse geocoding and coordinate validation.
+Graph Algorithms & Procedural Generation: NetworkX (v3.6) for backbone road network connectivity and graph pathing; random module for heuristic quadrant layout generation.
+Data Schemas & Validation: Pydantic (v2.13) & pydantic-settings for strict request/response data validation.
+Vector File Generation: Custom SVG generation engine for vector/CAD layout export (xml/SVG output).
+
+
+Frontend Stack (React + WebGL Ecosystem)
+Core Runtime & Build Tooling: React 19, TypeScript 6.0, Vite 8 (with @vitejs/plugin-react).
+Routing & State Management: React Router DOM (v7) for multi-view navigation; Zustand (v5) for global authentication and state persistence (localStorage).
+Interactive GIS & Mapping: Leaflet (v1.9) & React-Leaflet (v5) for interactive satellite/street maps, coordinate picking, polygon rendering, and road network overlays.
+3D Shaders & Visual Effects: OGL (v1.0) minimal WebGL library powering GLSL vertex/fragment shaders for dynamic background effects (Prism.tsx).
+Animations & Micro-interactions: Framer Motion (v12), GSAP (v3), custom HTML5 Canvas particle systems (MagicBento.tsx), interactive proximity typography (VariableProximity.tsx), and gradient shimmer (ShinyText.tsx).
+UI Components & Styling: Tailwind CSS (v4), PostCSS, Autoprefixer, Radix UI (@radix-ui/react-slot), Lucide React (Icon system), clsx, and tailwind-merge.
+OAuth Integration: @react-oauth/google for Google Sign-In button and token exchange, plus jwt-decode.
+Code Quality & Linting: Oxlint (v1.71).
+
