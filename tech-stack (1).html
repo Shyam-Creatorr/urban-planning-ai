@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Technology Stack — Urban Planning AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:       #0a0e1a;
+    --surface:  #111827;
+    --surface2: #1a2235;
+    --border:   #1e2d45;
+    --accent1:  #3b82f6;
+    --accent2:  #8b5cf6;
+    --accent3:  #10b981;
+    --accent4:  #f59e0b;
+    --accent5:  #ef4444;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --faint:    #1e293b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ───────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding: 72px 40px 56px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,.18) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 40% at 90% 50%, rgba(139,92,246,.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    border: 1px solid rgba(59,130,246,.35);
+    padding: .25rem .8rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .75rem;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ── STATS BAR ──────────────────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 0 40px;
+    overflow-x: auto;
+  }
+  .stat-item {
+    padding: 1.1rem 2.5rem;
+    border-right: 1px solid var(--border);
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent1);
+  }
+  .stat-lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase;
+              letter-spacing: .1em; margin-top: .15rem; }
+
+  /* ── LAYOUT ─────────────────────────────────────────────── */
+  .content { max-width: 1200px; margin: 0 auto; padding: 0 40px 80px; }
+
+  /* ── SECTION HEADER ─────────────────────────────────────── */
+  .section {
+    margin-top: 64px;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .section-desc { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
+
+  /* ── TECH GRID ──────────────────────────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .tech-card {
+    background: var(--surface);
+    padding: 1.4rem 1.5rem;
+    transition: background .2s;
+    position: relative;
+  }
+  .tech-card:hover { background: var(--surface2); }
+
+  .tech-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    margin-bottom: .75rem;
+  }
+  .tech-logo {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .tech-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .tech-version {
+    font-family: 'DM Mono', monospace;
+    font-size: .68rem;
+    color: var(--muted);
+    margin-top: .1rem;
+  }
+  .tech-desc {
+    font-size: .82rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    margin-bottom: .9rem;
+  }
+
+  /* ── USAGE TAGS ─────────────────────────────────────────── */
+  .usage-list { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .usage-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: .68rem;
+    padding: .2rem .55rem;
+    border-radius: 5px;
+    border: 1px solid transparent;
+  }
+
+  /* ── FILE CHIPS ─────────────────────────────────────────── */
+  .file-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem; }
+  .file-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    background: var(--faint);
+    color: var(--muted);
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── LAYER PILL ─────────────────────────────────────────── */
+  .layer-pill {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .6rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    opacity: .7;
+  }
+
+  /* ── ARCHITECTURE DIAGRAM ───────────────────────────────── */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: .5rem 0;
+  }
+  .arch-box {
+    padding: .4rem 1rem;
+    border-radius: 7px;
+    font-size: .78rem;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .arch-arrow {
+    color: var(--muted);
+    font-size: .9rem;
+  }
+  .arch-label {
+    font-size: .65rem;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  /* ── COLOR SCHEME HELPERS ───────────────────────────────── */
+  /* frontend */
+  .c-blue   { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.3); color: #93c5fd; }
+  .c-violet { background: rgba(139,92,246,.12); border-color: rgba(139,92,246,.3); color: #c4b5fd; }
+  /* backend */
+  .c-green  { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.3); color: #6ee7b7; }
+  .c-teal   { background: rgba(20,184,166,.12); border-color: rgba(20,184,166,.3); color: #5eead4; }
+  /* ml */
+  .c-orange { background: rgba(249,115,22,.12); border-color: rgba(249,115,22,.3); color: #fdba74; }
+  .c-amber  { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.3); color: #fcd34d; }
+  /* db */
+  .c-cyan   { background: rgba(6,182,212,.12);  border-color: rgba(6,182,212,.3);  color: #67e8f9; }
+  /* map */
+  .c-lime   { background: rgba(132,204,22,.12); border-color: rgba(132,204,22,.3); color: #bef264; }
+  /* devtools */
+  .c-pink   { background: rgba(236,72,153,.12); border-color: rgba(236,72,153,.3); color: #f9a8d4; }
+  .c-red    { background: rgba(239,68,68,.12);  border-color: rgba(239,68,68,.3);  color: #fca5a5; }
+
+  /* icon backgrounds */
+  .icon-blue   { background: rgba(59,130,246,.15);  border-color: rgba(59,130,246,.25); }
+  .icon-violet { background: rgba(139,92,246,.15);  border-color: rgba(139,92,246,.25); }
+  .icon-green  { background: rgba(16,185,129,.15);  border-color: rgba(16,185,129,.25); }
+  .icon-orange { background: rgba(249,115,22,.15);  border-color: rgba(249,115,22,.25); }
+  .icon-amber  { background: rgba(245,158,11,.15);  border-color: rgba(245,158,11,.25); }
+  .icon-cyan   { background: rgba(6,182,212,.15);   border-color: rgba(6,182,212,.25);  }
+  .icon-lime   { background: rgba(132,204,22,.15);  border-color: rgba(132,204,22,.25); }
+  .icon-pink   { background: rgba(236,72,153,.15);  border-color: rgba(236,72,153,.25); }
+  .icon-teal   { background: rgba(20,184,166,.15);  border-color: rgba(20,184,166,.25); }
+
+  .pill-front { background: rgba(59,130,246,.12);  color: #93c5fd;  border: 1px solid rgba(59,130,246,.2);  }
+  .pill-back  { background: rgba(16,185,129,.12);  color: #6ee7b7;  border: 1px solid rgba(16,185,129,.2);  }
+  .pill-ml    { background: rgba(249,115,22,.12);  color: #fdba74;  border: 1px solid rgba(249,115,22,.2);  }
+  .pill-db    { background: rgba(6,182,212,.12);   color: #67e8f9;  border: 1px solid rgba(6,182,212,.2);   }
+  .pill-map   { background: rgba(132,204,22,.12);  color: #bef264;  border: 1px solid rgba(132,204,22,.2);  }
+  .pill-dev   { background: rgba(236,72,153,.12);  color: #f9a8d4;  border: 1px solid rgba(236,72,153,.2);  }
+
+  /* ── FOOTER ─────────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 2.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .78rem;
+    font-family: 'DM Mono', monospace;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 20px 36px; }
+    .content { padding: 0 20px 60px; }
+    .stats-bar { margin: 0; }
+    .stat-item { padding: .9rem 1.2rem; }
+    .tech-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+  <div class="hero-tag">Technical Reference v1.0</div>
+  <h1>Technology Stack</h1>
+  <p class="hero-sub">Complete breakdown of every technology used in the Urban Planning AI system — what it is, why it's used, and exactly where it appears in the codebase.</p>
+</div>
+
+<!-- ═══════════════ STATS ═══════════════ -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">32</div><div class="stat-lbl">Total Files</div></div>
+  <div class="stat-item"><div class="stat-num">18</div><div class="stat-lbl">API Endpoints</div></div>
+  <div class="stat-item"><div class="stat-num">7</div><div class="stat-lbl">React Pages</div></div>
+  <div class="stat-item"><div class="stat-num">5</div><div class="stat-lbl">Flask Blueprints</div></div>
+  <div class="stat-item"><div class="stat-num">3</div><div class="stat-lbl">HITL Stages</div></div>
+  <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">DB Tables</div></div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-blue">🏗️</div>
+    <div>
+      <div class="section-title">System Architecture</div>
+      <div class="section-desc">How the layers connect end-to-end</div>
+    </div>
+  </div>
+  <div class="arch-diagram">
+    <div class="arch-row">
+      <div class="arch-box c-blue">Browser / User</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box c-blue">React 18</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box c-blue">Axios /api/*</div>
+      <div class="arch-label">← Frontend Layer (Port 3000)</div>
+    </div>
+    <div class="arch-row" style="padding-left:2rem">
+      <div style="color:var(--border); font-size:.8rem">│</div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-box c-green">Flask Server</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box c-green">Blueprints</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box c-green">Route Handlers</div>
+      <div class="arch-label">← Backend Layer (Port 5000)</div>
+    </div>
+    <div class="arch-row" style="padding-left:2rem">
+      <div style="color:var(--border); font-size:.8rem">├──────────────┬──────────────┬────────────────</div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-box c-cyan">SQLite DB</div>
+      <div class="arch-arrow" style="opacity:.4">|</div>
+      <div class="arch-box c-orange">Layout Model</div>
+      <div class="arch-arrow" style="opacity:.4">|</div>
+      <div class="arch-box c-lime">OpenStreetMap</div>
+      <div class="arch-label">← Services Layer</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FRONTEND ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-blue">⚛️</div>
+    <div>
+      <div class="section-title">Frontend Technologies</div>
+      <div class="section-desc">Everything running in the browser — React, routing, maps, HTTP</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- React -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-blue">⚛️</div>
+        <div>
+          <div class="tech-name">React 18</div>
+          <div class="tech-version">v18.2.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">JavaScript library for building user interfaces using a component tree and virtual DOM. Handles all screen rendering, state, and events in the browser.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-blue">Component UI</span>
+        <span class="usage-tag c-blue">State Management</span>
+        <span class="usage-tag c-blue">Event Handling</span>
+        <span class="usage-tag c-blue">Conditional Rendering</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">App.jsx</span>
+        <span class="file-chip">main.jsx</span>
+        <span class="file-chip">All pages/*.jsx</span>
+        <span class="file-chip">Navbar.jsx</span>
+      </div>
+    </div>
+
+    <!-- React Router -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-blue">🔀</div>
+        <div>
+          <div class="tech-name">React Router v6</div>
+          <div class="tech-version">v6.21.1</div>
+        </div>
+      </div>
+      <div class="tech-desc">Client-side routing library. Handles URL navigation between pages without full page reloads. Also protects routes based on login status and user role.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-blue">Page Navigation</span>
+        <span class="usage-tag c-blue">Protected Routes</span>
+        <span class="usage-tag c-blue">Role-based Access</span>
+        <span class="usage-tag c-blue">URL Parameters</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">App.jsx — &lt;Routes&gt;</span>
+        <span class="file-chip">PrivateRoute component</span>
+        <span class="file-chip">useNavigate()</span>
+        <span class="file-chip">useParams()</span>
+      </div>
+    </div>
+
+    <!-- Axios -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-violet">📡</div>
+        <div>
+          <div class="tech-name">Axios</div>
+          <div class="tech-version">v1.6.5</div>
+        </div>
+      </div>
+      <div class="tech-desc">HTTP client for making API calls from React to the Flask backend. Configured with interceptors to automatically attach the JWT token to every request and redirect on 401 errors.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-violet">API Calls</span>
+        <span class="usage-tag c-violet">Token Injection</span>
+        <span class="usage-tag c-violet">401 Redirect</span>
+        <span class="usage-tag c-violet">Error Handling</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">utils/api.js</span>
+        <span class="file-chip">interceptors.request</span>
+        <span class="file-chip">interceptors.response</span>
+      </div>
+    </div>
+
+    <!-- Leaflet / OpenStreetMap -->
+    <div class="tech-card">
+      <div class="layer-pill pill-map">Maps</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-lime">🗺️</div>
+        <div>
+          <div class="tech-name">Leaflet.js + OpenStreetMap</div>
+          <div class="tech-version">Leaflet v1.9.4</div>
+        </div>
+      </div>
+      <div class="tech-desc">Free, open-source interactive map library using OpenStreetMap tiles. No API key required. Used to let users click a location for their land, and draws a live rectangle overlay as they type dimensions.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-lime">Map Display</span>
+        <span class="usage-tag c-lime">Click-to-Pin Location</span>
+        <span class="usage-tag c-lime">Land Rectangle Overlay</span>
+        <span class="usage-tag c-lime">Free &amp; No API Key</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">NewProjectPage.jsx</span>
+        <span class="file-chip">L.map() — init</span>
+        <span class="file-chip">L.tileLayer() — OSM</span>
+        <span class="file-chip">L.rectangle() — land</span>
+      </div>
+    </div>
+
+    <!-- React Toastify -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-violet">🔔</div>
+        <div>
+          <div class="tech-name">React Toastify</div>
+          <div class="tech-version">v9.1.3</div>
+        </div>
+      </div>
+      <div class="tech-desc">Notification / toast library. Shows success, error and warning messages as pop-up banners after every user action — login, project creation, validation response, download, etc.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-violet">Success Alerts</span>
+        <span class="usage-tag c-violet">Error Alerts</span>
+        <span class="usage-tag c-violet">Warning Alerts</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">main.jsx — &lt;ToastContainer&gt;</span>
+        <span class="file-chip">toast.success()</span>
+        <span class="file-chip">toast.error()</span>
+        <span class="file-chip">All pages</span>
+      </div>
+    </div>
+
+    <!-- Vite -->
+    <div class="tech-card">
+      <div class="layer-pill pill-dev">Dev Tool</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-pink">⚡</div>
+        <div>
+          <div class="tech-name">Vite</div>
+          <div class="tech-version">v5.0.11</div>
+        </div>
+      </div>
+      <div class="tech-desc">Frontend build tool and dev server. Starts the React app on port 3000 and proxies all <code style="font-family:'DM Mono',monospace;font-size:.8em">/api</code> requests to Flask on port 5000, so both run together without CORS issues during development.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-pink">Dev Server</span>
+        <span class="usage-tag c-pink">API Proxy → Flask</span>
+        <span class="usage-tag c-pink">Hot Reload</span>
+        <span class="usage-tag c-pink">Production Build</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">vite.config.js</span>
+        <span class="file-chip">proxy: /api → :5000</span>
+        <span class="file-chip">npm run dev</span>
+      </div>
+    </div>
+
+    <!-- Context API -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-blue">🔑</div>
+        <div>
+          <div class="tech-name">React Context API</div>
+          <div class="tech-version">Built into React</div>
+        </div>
+      </div>
+      <div class="tech-desc">React's built-in global state mechanism. Used to store the logged-in user and token across all pages so every component can access auth without prop-drilling.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-blue">Global Auth State</span>
+        <span class="usage-tag c-blue">Login / Logout</span>
+        <span class="usage-tag c-blue">User Role Access</span>
+        <span class="usage-tag c-blue">Token Persistence</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">utils/AuthContext.jsx</span>
+        <span class="file-chip">createContext()</span>
+        <span class="file-chip">useAuth() hook</span>
+        <span class="file-chip">localStorage</span>
+      </div>
+    </div>
+
+    <!-- Google Fonts -->
+    <div class="tech-card">
+      <div class="layer-pill pill-front">Frontend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-blue">🔤</div>
+        <div>
+          <div class="tech-name">Google Fonts — Inter</div>
+          <div class="tech-version">Free CDN</div>
+        </div>
+      </div>
+      <div class="tech-desc">Provides the Inter typeface used throughout the UI for clean, readable interface text across all components, forms, and dashboards.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-blue">UI Typography</span>
+        <span class="usage-tag c-blue">Form Labels</span>
+        <span class="usage-tag c-blue">Dashboard Text</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">index.html — &lt;link&gt;</span>
+        <span class="file-chip">styles/global.css</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ BACKEND ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-green">🐍</div>
+    <div>
+      <div class="section-title">Backend Technologies</div>
+      <div class="section-desc">Python server, authentication, API structure and routing</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- Flask -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-green">🌶️</div>
+        <div>
+          <div class="tech-name">Flask</div>
+          <div class="tech-version">v3.0.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">Lightweight Python web framework. Runs the entire backend API server. All 18 API endpoints are built as Flask routes, organized into 5 Blueprint modules for clean separation of concerns.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-green">REST API Server</span>
+        <span class="usage-tag c-green">Route Handlers</span>
+        <span class="usage-tag c-green">Blueprint Modules</span>
+        <span class="usage-tag c-green">JSON Responses</span>
+        <span class="usage-tag c-green">File Downloads</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py</span>
+        <span class="file-chip">api/auth_routes.py</span>
+        <span class="file-chip">api/project_routes.py</span>
+        <span class="file-chip">api/validation_routes.py</span>
+        <span class="file-chip">api/map_routes.py</span>
+        <span class="file-chip">api/admin_routes.py</span>
+      </div>
+    </div>
+
+    <!-- Flask-CORS -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-green">🔓</div>
+        <div>
+          <div class="tech-name">Flask-CORS</div>
+          <div class="tech-version">v4.0.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">Adds Cross-Origin Resource Sharing headers to all Flask responses. Allows the React frontend on port 3000 to call the Flask API on port 5000 without the browser blocking requests.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-green">Cross-Origin Requests</span>
+        <span class="usage-tag c-green">Frontend ↔ Backend</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — CORS(app)</span>
+      </div>
+    </div>
+
+    <!-- Werkzeug -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-teal">🔧</div>
+        <div>
+          <div class="tech-name">Werkzeug</div>
+          <div class="tech-version">v3.0.1</div>
+        </div>
+      </div>
+      <div class="tech-desc">The WSGI utility library that Flask is built on. Provides the development server, request/response objects, and file serving utilities used when sending the 2D layout PNG to the user.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-teal">WSGI Server</span>
+        <span class="usage-tag c-teal">Request Objects</span>
+        <span class="usage-tag c-teal">File Serving</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — send_file()</span>
+        <span class="file-chip">project_routes.py</span>
+      </div>
+    </div>
+
+    <!-- hashlib / base64 -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-green">🔐</div>
+        <div>
+          <div class="tech-name">hashlib + base64</div>
+          <div class="tech-version">Python Standard Library</div>
+        </div>
+      </div>
+      <div class="tech-desc">Built-in Python modules. <strong style="color:#e2e8f0">hashlib</strong> hashes passwords with SHA-256 before storing them in the database. <strong style="color:#e2e8f0">base64</strong> encodes the session token that is sent to the frontend after login.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-green">Password Hashing</span>
+        <span class="usage-tag c-green">Session Tokens</span>
+        <span class="usage-tag c-green">Auth Security</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">api/auth_routes.py</span>
+        <span class="file-chip">hash_password()</span>
+        <span class="file-chip">generate_token()</span>
+        <span class="file-chip">decode_token()</span>
+      </div>
+    </div>
+
+    <!-- Python logging -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-teal">📋</div>
+        <div>
+          <div class="tech-name">Python logging</div>
+          <div class="tech-version">Standard Library</div>
+        </div>
+      </div>
+      <div class="tech-desc">Standard Python logging module. Writes timestamped server activity to both the terminal and a log file — every login, project creation, validation, and error is recorded.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-teal">Server Logs</span>
+        <span class="usage-tag c-teal">Error Tracking</span>
+        <span class="usage-tag c-teal">File + Console Output</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — logging.basicConfig</span>
+        <span class="file-chip">urban_planning.log</span>
+        <span class="file-chip">logger.info() / .error()</span>
+      </div>
+    </div>
+
+    <!-- python-dotenv -->
+    <div class="tech-card">
+      <div class="layer-pill pill-back">Backend</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-green">⚙️</div>
+        <div>
+          <div class="tech-name">python-dotenv</div>
+          <div class="tech-version">v1.0.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">Loads environment variables from a <code style="font-family:'DM Mono',monospace;font-size:.8em">.env</code> file. Used to store the Flask secret key and other config values outside of the source code, following security best practices.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-green">Secret Key Config</span>
+        <span class="usage-tag c-green">Environment Variables</span>
+        <span class="usage-tag c-green">Security</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — SECRET_KEY</span>
+        <span class="file-chip">.env file (create yourself)</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ DATABASE ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-cyan">🗄️</div>
+    <div>
+      <div class="section-title">Database</div>
+      <div class="section-desc">Data storage, schema, and query management</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- SQLite -->
+    <div class="tech-card">
+      <div class="layer-pill pill-db">Database</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-cyan">🗃️</div>
+        <div>
+          <div class="tech-name">SQLite</div>
+          <div class="tech-version">Built into Python</div>
+        </div>
+      </div>
+      <div class="tech-desc">Serverless, file-based relational database. Stores everything in a single file <code style="font-family:'DM Mono',monospace;font-size:.8em">urban_planning.db</code>. No separate DB server needed. Contains 8 tables covering users, projects, land, requirements, predictions, validations and outputs.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-cyan">User Accounts</span>
+        <span class="usage-tag c-cyan">Project Data</span>
+        <span class="usage-tag c-cyan">Land Details</span>
+        <span class="usage-tag c-cyan">Predictions</span>
+        <span class="usage-tag c-cyan">HITL Records</span>
+        <span class="usage-tag c-cyan">Output Files</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">database/schema.sql</span>
+        <span class="file-chip">database/db_init.py</span>
+        <span class="file-chip">database/db_manager.py</span>
+        <span class="file-chip">app.py — get_db()</span>
+      </div>
+    </div>
+
+    <!-- sqlite3 module -->
+    <div class="tech-card">
+      <div class="layer-pill pill-db">Database</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-cyan">🔌</div>
+        <div>
+          <div class="tech-name">sqlite3 Module</div>
+          <div class="tech-version">Python Standard Library</div>
+        </div>
+      </div>
+      <div class="tech-desc">Python's built-in SQLite driver. Manages connections, executes parameterized queries (preventing SQL injection), and uses <code style="font-family:'DM Mono',monospace;font-size:.8em">Row factory</code> to return query results as dictionaries instead of plain tuples.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-cyan">DB Connection</span>
+        <span class="usage-tag c-cyan">SQL Queries</span>
+        <span class="usage-tag c-cyan">SQL Injection Prevention</span>
+        <span class="usage-tag c-cyan">Row → Dict Mapping</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — query_db()</span>
+        <span class="file-chip">app.py — execute_db()</span>
+        <span class="file-chip">database/db_manager.py</span>
+        <span class="file-chip">conn.row_factory</span>
+      </div>
+    </div>
+
+    <!-- json module -->
+    <div class="tech-card">
+      <div class="layer-pill pill-db">Database</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-cyan">📦</div>
+        <div>
+          <div class="tech-name">json Module</div>
+          <div class="tech-version">Python Standard Library</div>
+        </div>
+      </div>
+      <div class="tech-desc">Python's JSON serializer. Since SQLite doesn't have a native JSON column type, complex objects like coordinates, dimensions, requirements, and layout predictions are serialized to JSON strings before saving and parsed back out on retrieval.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-cyan">Serialize Coordinates</span>
+        <span class="usage-tag c-cyan">Serialize Layouts</span>
+        <span class="usage-tag c-cyan">Serialize Requirements</span>
+        <span class="usage-tag c-cyan">API Request/Response</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">json.dumps() — save</span>
+        <span class="file-chip">json.loads() — read</span>
+        <span class="file-chip">All route files</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ AI / ML ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-orange">🤖</div>
+    <div>
+      <div class="section-title">AI / ML Technologies</div>
+      <div class="section-desc">Layout generation engine, constraint system, and training data pipeline</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- PyTorch -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">AI/ML</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-orange">🔥</div>
+        <div>
+          <div class="tech-name">PyTorch</div>
+          <div class="tech-version">v2.1.2</div>
+        </div>
+      </div>
+      <div class="tech-desc">Deep learning framework for building the custom GNN layout model. The current codebase uses a rule-based placeholder. When your GNN is trained, its <code style="font-family:'DM Mono',monospace;font-size:.8em">model.forward()</code> replaces the rule-based function in <code style="font-family:'DM Mono',monospace;font-size:.8em">_rule_based_layout()</code>.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-orange">Custom GNN Model</span>
+        <span class="usage-tag c-orange">Model Training</span>
+        <span class="usage-tag c-orange">Tensor Operations</span>
+        <span class="usage-tag c-orange">Model Inference</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/layout_generator.py</span>
+        <span class="file-chip">_rule_based_layout() ← replace</span>
+        <span class="file-chip">requirements.txt</span>
+      </div>
+    </div>
+
+    <!-- PyTorch Geometric -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">AI/ML</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-orange">🕸️</div>
+        <div>
+          <div class="tech-name">PyTorch Geometric</div>
+          <div class="tech-version">v2.4.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">Extension library for Graph Neural Networks on top of PyTorch. The land parcel, buildings, and road network are naturally represented as graphs — nodes are buildings/intersections, edges are roads. GNN learns spatial relationships.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-orange">Graph Neural Network</span>
+        <span class="usage-tag c-orange">Spatial Encoding</span>
+        <span class="usage-tag c-orange">Node/Edge Features</span>
+        <span class="usage-tag c-orange">Layout Decoding</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/layout_generator.py</span>
+        <span class="file-chip">GNNEncoder (planned)</span>
+        <span class="file-chip">LayoutDecoder (planned)</span>
+      </div>
+    </div>
+
+    <!-- NumPy -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">AI/ML</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-amber">🔢</div>
+        <div>
+          <div class="tech-name">NumPy</div>
+          <div class="tech-version">v1.26.3</div>
+        </div>
+      </div>
+      <div class="tech-desc">Fundamental numerical computing library. Provides fast array operations needed for coordinate calculations, polygon geometry, distance computations, and feature vector construction during layout generation.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-amber">Coordinate Arrays</span>
+        <span class="usage-tag c-amber">Geometry Math</span>
+        <span class="usage-tag c-amber">Feature Vectors</span>
+        <span class="usage-tag c-amber">Numerical Ops</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/constraint_validator.py</span>
+        <span class="file-chip">models/layout_generator.py</span>
+      </div>
+    </div>
+
+    <!-- SciPy -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">AI/ML</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-amber">📐</div>
+        <div>
+          <div class="tech-name">SciPy</div>
+          <div class="tech-version">v1.11.4</div>
+        </div>
+      </div>
+      <div class="tech-desc">Scientific computing library. Used for Delaunay triangulation to generate optimal road network topology between building centroids — the triangulation gives the minimal connected graph that links all buildings.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-amber">Delaunay Triangulation</span>
+        <span class="usage-tag c-amber">Road Network Graph</span>
+        <span class="usage-tag c-amber">Geometric Optimization</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/layout_generator.py</span>
+        <span class="file-chip">scipy.spatial.Delaunay</span>
+        <span class="file-chip">RoadNetworkBuilder</span>
+      </div>
+    </div>
+
+    <!-- scikit-learn -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">AI/ML</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-orange">⚗️</div>
+        <div>
+          <div class="tech-name">scikit-learn</div>
+          <div class="tech-version">v1.3.2</div>
+        </div>
+      </div>
+      <div class="tech-desc">ML utilities library. Provides preprocessing tools, train/test split, and scoring metrics used during model training and evaluation when benchmarking the custom GNN layout model against the synthetic dataset.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-orange">Data Preprocessing</span>
+        <span class="usage-tag c-orange">Train/Test Split</span>
+        <span class="usage-tag c-orange">Model Evaluation</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/data_generator.py</span>
+        <span class="file-chip">Model training pipeline</span>
+      </div>
+    </div>
+
+    <!-- Custom Constraint Engine -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">Custom</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-amber">✅</div>
+        <div>
+          <div class="tech-name">Custom Constraint Engine</div>
+          <div class="tech-version">Built from scratch</div>
+        </div>
+      </div>
+      <div class="tech-desc">Pure-Python geometry system written from scratch using the Shoelace formula, cross-product orientation tests, and AABB overlap checks. Validates 8 hard constraints on every generated layout with a 10-retry loop.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-amber">No Building-Road Collision</span>
+        <span class="usage-tag c-amber">All Buildings Accessible</span>
+        <span class="usage-tag c-amber">Gates Exist</span>
+        <span class="usage-tag c-amber">Boundary Wall</span>
+        <span class="usage-tag c-amber">≥70% Space Used</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/constraint_validator.py</span>
+        <span class="file-chip">_polygons_overlap()</span>
+        <span class="file-chip">_building_touches_road()</span>
+        <span class="file-chip">_polygon_area() — Shoelace</span>
+      </div>
+    </div>
+
+    <!-- Synthetic Data Generator -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">Custom</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-orange">🏭</div>
+        <div>
+          <div class="tech-name">Synthetic Data Generator</div>
+          <div class="tech-version">Built from scratch</div>
+        </div>
+      </div>
+      <div class="tech-desc">Custom training data pipeline. Generates thousands of random land parcels, requirements, and valid layouts in JSON Lines format for training the GNN. Run once from command line to produce a dataset.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-orange">Training Data</span>
+        <span class="usage-tag c-orange">Random Land Parcels</span>
+        <span class="usage-tag c-orange">JSON Lines Output</span>
+        <span class="usage-tag c-orange">CLI Tool</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/data_generator.py</span>
+        <span class="file-chip">python data_generator.py --samples 5000</span>
+        <span class="file-chip">data/training.jsonl</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ VISUALIZATION ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-pink">🖼️</div>
+    <div>
+      <div class="section-title">Visualization &amp; Output</div>
+      <div class="section-desc">Generating and serving the final 2D layout image</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- Matplotlib -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">Output</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-pink">📊</div>
+        <div>
+          <div class="tech-name">Matplotlib</div>
+          <div class="tech-version">v3.8.2</div>
+        </div>
+      </div>
+      <div class="tech-desc">Python plotting library used to draw the final 2D layout. Renders boundary walls, buildings (colour-coded by type), roads (grey), green spaces, and entry/exit gate markers onto a canvas and saves it as a high-res PNG at 300 DPI.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-pink">2D Layout Render</span>
+        <span class="usage-tag c-pink">Boundary Wall</span>
+        <span class="usage-tag c-pink">Building Rectangles</span>
+        <span class="usage-tag c-pink">Road Polygons</span>
+        <span class="usage-tag c-pink">Green Space Patches</span>
+        <span class="usage-tag c-pink">300 DPI PNG Export</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">app.py — generate_2d_output()</span>
+        <span class="file-chip">api/project_routes.py</span>
+        <span class="file-chip">matplotlib.patches</span>
+        <span class="file-chip">Agg backend (no display)</span>
+      </div>
+    </div>
+
+    <!-- Pillow -->
+    <div class="tech-card">
+      <div class="layer-pill pill-ml">Output</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-pink">🖼️</div>
+        <div>
+          <div class="tech-name">Pillow (PIL)</div>
+          <div class="tech-version">v10.2.0</div>
+        </div>
+      </div>
+      <div class="tech-desc">Image processing library. Works alongside Matplotlib to handle PNG encoding, image manipulation and format conversion for the output layout files before they are served as downloads to the user.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-pink">Image Processing</span>
+        <span class="usage-tag c-pink">PNG Encoding</span>
+        <span class="usage-tag c-pink">Format Conversion</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">requirements.txt</span>
+        <span class="file-chip">Matplotlib dependency</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ MAP SERVICES ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-lime">🌍</div>
+    <div>
+      <div class="section-title">Map &amp; Geospatial Services</div>
+      <div class="section-desc">All free and open-source — zero API key required</div>
+    </div>
+  </div>
+  <div class="tech-grid">
+
+    <!-- OpenStreetMap -->
+    <div class="tech-card">
+      <div class="layer-pill pill-map">Maps</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-lime">🗺️</div>
+        <div>
+          <div class="tech-name">OpenStreetMap</div>
+          <div class="tech-version">Free, no key</div>
+        </div>
+      </div>
+      <div class="tech-desc">Open-source crowd-sourced map of the world. Provides the map tile images displayed in the Leaflet map widget. Tile URL format: <code style="font-family:'DM Mono',monospace;font-size:.75em">{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</code>. No account or API key needed.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-lime">Map Tiles</span>
+        <span class="usage-tag c-lime">Satellite Imagery Feel</span>
+        <span class="usage-tag c-lime">Zoom Levels 1–19</span>
+        <span class="usage-tag c-lime">Free Forever</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">frontend/NewProjectPage.jsx</span>
+        <span class="file-chip">api/map_routes.py</span>
+        <span class="file-chip">L.tileLayer(OSM url)</span>
+      </div>
+    </div>
+
+    <!-- Nominatim -->
+    <div class="tech-card">
+      <div class="layer-pill pill-map">Maps</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-lime">📍</div>
+        <div>
+          <div class="tech-name">Nominatim</div>
+          <div class="tech-version">OSM Geocoder — Free</div>
+        </div>
+      </div>
+      <div class="tech-desc">OpenStreetMap's free geocoding service. Converts a city/address name (e.g. "Hosur Tamil Nadu") into lat/lng coordinates to pre-fill the land input form. Limited to 1 request/second — the backend returns the URL and the frontend calls it directly.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-lime">Forward Geocoding</span>
+        <span class="usage-tag c-lime">Address → Lat/Lng</span>
+        <span class="usage-tag c-lime">India Filter</span>
+        <span class="usage-tag c-lime">Free, No Key</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">api/map_routes.py — /geocode</span>
+        <span class="file-chip">nominatim.openstreetmap.org</span>
+        <span class="file-chip">countrycodes=in</span>
+      </div>
+    </div>
+
+    <!-- geopy -->
+    <div class="tech-card">
+      <div class="layer-pill pill-map">Maps</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-lime">📏</div>
+        <div>
+          <div class="tech-name">geopy</div>
+          <div class="tech-version">v2.4.1</div>
+        </div>
+      </div>
+      <div class="tech-desc">Python geocoding library. Used for geographic distance calculations between coordinates and to verify that the entered land is within India's bounding box (lat 6.5°–35.5°, lng 68°–97.5°).</div>
+      <div class="usage-list">
+        <span class="usage-tag c-lime">Distance Calculation</span>
+        <span class="usage-tag c-lime">India Bounds Check</span>
+        <span class="usage-tag c-lime">Coordinate Validation</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">api/map_routes.py</span>
+        <span class="file-chip">app.py — validate_coordinates()</span>
+      </div>
+    </div>
+
+    <!-- Shapely -->
+    <div class="tech-card">
+      <div class="layer-pill pill-map">Maps</div>
+      <div class="tech-card-top">
+        <div class="tech-logo icon-lime">🔷</div>
+        <div>
+          <div class="tech-name">Shapely</div>
+          <div class="tech-version">v2.0.2</div>
+        </div>
+      </div>
+      <div class="tech-desc">Python geometry library for working with 2D shapes — polygons, lines, points. Used for precise intersection tests between land parcels, buildings and roads during constraint validation beyond the custom pure-Python geometry code.</div>
+      <div class="usage-list">
+        <span class="usage-tag c-lime">Polygon Operations</span>
+        <span class="usage-tag c-lime">Intersection Tests</span>
+        <span class="usage-tag c-lime">Area Calculation</span>
+        <span class="usage-tag c-lime">Geometry Objects</span>
+      </div>
+      <div class="file-chips">
+        <span class="file-chip">models/constraint_validator.py</span>
+        <span class="file-chip">models/layout_generator.py</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ QUICK REFERENCE TABLE ═══════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-icon icon-violet">📋</div>
+    <div>
+      <div class="section-title">Quick Reference — All Technologies</div>
+      <div class="section-desc">Full list at a glance sorted by layer</div>
+    </div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+      <thead>
+        <tr style="background:var(--surface2);">
+          <th style="padding:.75rem 1.1rem;text-align:left;color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;">Technology</th>
+          <th style="padding:.75rem 1rem;text-align:left;color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;">Layer</th>
+          <th style="padding:.75rem 1rem;text-align:left;color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;">Used For</th>
+          <th style="padding:.75rem 1rem;text-align:left;color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;">Free?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#93c5fd;">React 18</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-blue" style="font-size:.68rem;">Frontend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">All UI pages, components, state</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#93c5fd;">React Router v6</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-blue" style="font-size:.68rem;">Frontend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Page routing, protected routes, role guards</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#93c5fd;">Axios</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-blue" style="font-size:.68rem;">Frontend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">HTTP calls to Flask API, token injection</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#bef264;">Leaflet.js</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-lime" style="font-size:.68rem;">Maps</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Interactive map in land input form</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#bef264;">OpenStreetMap</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-lime" style="font-size:.68rem;">Maps</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Map tiles displayed in Leaflet widget</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free, No Key</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#bef264;">Nominatim</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-lime" style="font-size:.68rem;">Maps</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Address to lat/lng geocoding</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free, No Key</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#c4b5fd;">React Toastify</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-blue" style="font-size:.68rem;">Frontend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Success / error / warning notifications</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#f9a8d4;">Vite</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-pink" style="font-size:.68rem;">Dev Tool</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Frontend dev server + API proxy</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#6ee7b7;">Flask</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-green" style="font-size:.68rem;">Backend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">REST API server, 18 endpoints, 5 blueprints</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#6ee7b7;">Flask-CORS</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-green" style="font-size:.68rem;">Backend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Allow frontend on :3000 to call :5000</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#67e8f9;">SQLite</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-cyan" style="font-size:.68rem;">Database</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">All data — users, projects, predictions, HITL</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free, Built-in</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#fdba74;">PyTorch</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-orange" style="font-size:.68rem;">AI/ML</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Custom GNN model (replace placeholder)</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#fdba74;">PyTorch Geometric</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-orange" style="font-size:.68rem;">AI/ML</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Graph Neural Network for spatial layout learning</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#fcd34d;">NumPy</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-amber" style="font-size:.68rem;">AI/ML</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Coordinate arrays, geometry math, feature vectors</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#fcd34d;">SciPy</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-amber" style="font-size:.68rem;">AI/ML</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Delaunay triangulation for road network</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#f9a8d4;">Matplotlib</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-pink" style="font-size:.68rem;">Output</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">2D layout PNG generation at 300 DPI</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#bef264;">geopy</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-lime" style="font-size:.68rem;">Maps</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Coordinate validation, India bounds check</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#bef264;">Shapely</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-lime" style="font-size:.68rem;">Maps</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Polygon geometry, intersection checks</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#6ee7b7;">hashlib + base64</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-green" style="font-size:.68rem;">Backend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Password hashing, session token encoding</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Built-in</td>
+        </tr>
+        <tr style="border-top:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <td style="padding:.65rem 1.1rem;font-weight:600;color:#6ee7b7;">python-dotenv</td>
+          <td style="padding:.65rem 1rem;"><span class="usage-tag c-green" style="font-size:.68rem;">Backend</span></td>
+          <td style="padding:.65rem 1rem;color:var(--muted);">Environment variables, secret key config</td>
+          <td style="padding:.65rem 1rem;color:#6ee7b7;">✓ Free</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<div class="footer">
+  Urban Planning AI System &nbsp;•&nbsp; Technology Reference &nbsp;•&nbsp;
+  All technologies are free &amp; open source &nbsp;•&nbsp; No paid APIs required
+</div>
+
+</body>
+</html>
